@@ -1,15 +1,11 @@
-const FORECAST_ENDPOINT = 'https://api.open-meteo.com/v1/forecast';
-const GEOCODING_ENDPOINT = 'https://geocoding-api.open-meteo.com/v1/search';
-const TEMPERATURE_UNIT = 'fahrenheit';
-
-export async function getGeolocation(name: string) {
-    const params = {
-        name,
-    };
+export async function getPlaces(input: string) {
+    const params = new URLSearchParams({
+        input,
+    });
 
     try {
         const response = await fetch(
-            `${GEOCODING_ENDPOINT}?${new URLSearchParams(params)}`
+            `http://localhost:3000/api/places?${params.toString()}`
         );
         return await response.json();
     } catch (error) {
@@ -18,24 +14,68 @@ export async function getGeolocation(name: string) {
     }
 }
 
-export async function getWeatherForecast(latitude: number, longitude: number) {
-    const params = {
-        latitude: String(latitude),
-        longitude: String(longitude),
-        temperature_unit: TEMPERATURE_UNIT,
-        current:
-            'temperature_2m,weather_code,wind_speed_10m,wind_direction_10m',
-        hourly: 'temperature_2m,precipitation',
-        daily: 'weather_code,temperature_2m_max,temperature_2m_min',
-    };
+export async function getGeocoding(placeId: string) {
+    const params = new URLSearchParams({
+        place_id: placeId,
+    });
 
     try {
         const response = await fetch(
-            `${FORECAST_ENDPOINT}?${new URLSearchParams(params)}`
+            `http://localhost:3000/api/geocoding?${params.toString()}`
         );
         return await response.json();
     } catch (error) {
-        console.error('Error fetching weather data:', error);
+        console.error('Error fetching geolocation data:', error);
+        throw error;
+    }
+}
+
+export async function getReverseGeocoding(lat: number, lng: number) {
+    const params = new URLSearchParams({
+        latlng: `${lat},${lng}`,
+    });
+
+    try {
+        const response = await fetch(
+            `http://localhost:3000/api/geocoding?${params.toString()}`
+        );
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching reverse geolocation data:', error);
+        throw error;
+    }
+}
+
+export async function getLocationImage(placeId: string) {
+    const params = new URLSearchParams({
+        place_id: placeId,
+    });
+
+    try {
+        const response = await fetch(
+            `http://localhost:3000/api/photos?${params.toString()}`
+        );
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching location image:', error);
+        throw error;
+    }
+}
+
+export async function getAirQuality(lat: number, lng: number) {
+    const params = new URLSearchParams({
+        latitude: String(lat),
+        longitude: String(lng),
+        current: 'uv_index,uv_index_clear_sky,us_aqi',
+    });
+
+    try {
+        const response = await fetch(
+            `https://air-quality-api.open-meteo.com/v1/air-quality?${params.toString()}`
+        );
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching air quality data:', error);
         throw error;
     }
 }

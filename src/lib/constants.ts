@@ -1,168 +1,505 @@
-export const WEATHER_CODES: {
-    [code: number]: {
-        day: { description: string; image: string };
-        night: { description: string; image: string };
-    };
-} = {
-    0: {
-        day: { description: 'Clear', image: '/assets/icons/0-day.svg' },
-        night: { description: 'Clear', image: '/assets/icons/0-night.svg' },
+import { WeatherCode } from '@/types';
+
+export const HUMIDITY_SCALE = [
+    {
+        range: [0, 20],
+        label: 'Extremely Dry',
+        effects:
+            'Skin and eyes may feel dry. Fire risk increases. Not ideal for outdoor activities.',
+        comfort: 'Uncomfortable',
+        icon: '🌵',
+        color: '#f4dcdc',
     },
-    1: {
-        day: { description: 'Mainly Clear', image: '/assets/icons/1-day.svg' },
-        night: {
-            description: 'Mainly Clear',
-            image: '/assets/icons/1-night.svg',
-        },
+    {
+        range: [21, 35],
+        label: 'Very Dry',
+        effects: 'Air feels dry. May cause dehydration during long exposure.',
+        comfort: 'Slightly Uncomfortable',
+        icon: '🏜️',
+        color: '#edd3c4',
     },
-    2: {
-        day: { description: 'Partly Cloudy', image: '/assets/icons/2-day.svg' },
-        night: {
-            description: 'Partly Cloudy',
-            image: '/assets/icons/2-night.svg',
-        },
+    {
+        range: [36, 50],
+        label: 'Comfortable',
+        effects: 'Ideal for outdoor activities. Sweat evaporates efficiently.',
+        comfort: 'Comfortable',
+        icon: '🌤️',
+        color: '#d6f0e1',
     },
-    3: {
-        day: { description: 'Cloudy', image: '/assets/icons/3.svg' },
-        night: { description: 'Cloudy', image: '/assets/icons/3.svg' },
+    {
+        range: [51, 60],
+        label: 'Slightly Humid',
+        effects:
+            'Still comfortable for most people, but might feel a bit sticky during heat.',
+        comfort: 'Mildly Comfortable',
+        icon: '🌥️',
+        color: '#cce7ec',
     },
-    45: {
-        day: { description: 'Foggy', image: '/assets/icons/45.svg' },
-        night: { description: 'Foggy', image: '/assets/icons/45.svg' },
+    {
+        range: [61, 70],
+        label: 'Moderately Humid',
+        effects:
+            'Can feel muggy or sweaty, especially during activity. Shade recommended.',
+        comfort: 'Slightly Uncomfortable',
+        icon: '🌦️',
+        color: '#b1d1e0',
     },
-    48: {
-        day: { description: 'Rime Fog', image: '/assets/icons/45.svg' },
-        night: { description: 'Rime Fog', image: '/assets/icons/45.svg' },
+    {
+        range: [71, 80],
+        label: 'Humid',
+        effects:
+            'Sweating is less effective. Fatigue may increase. Take breaks if active.',
+        comfort: 'Uncomfortable',
+        icon: '🌧️',
+        color: '#98c3d6',
     },
-    51: {
-        day: { description: 'Light Drizzle', image: '/assets/icons/51.svg' },
-        night: { description: 'Light Drizzle', image: '/assets/icons/51.svg' },
+    {
+        range: [81, 90],
+        label: 'Very Humid',
+        effects:
+            'Heavy, sticky air. Heat stress is likely. Limit strenuous activities.',
+        comfort: 'Very Uncomfortable',
+        icon: '🌫️',
+        color: '#7caec6',
     },
-    53: {
-        day: { description: 'Drizzle', image: '/assets/icons/51.svg' },
-        night: { description: 'Drizzle', image: '/assets/icons/51.svg' },
+    {
+        range: [91, 100],
+        label: 'Extremely Humid',
+        effects:
+            'Oppressive and potentially dangerous. High risk of heat exhaustion or heat stroke.',
+        comfort: 'Dangerous',
+        icon: '🥵',
+        color: '#6397b3',
     },
-    55: {
-        day: { description: 'Heavy Drizzle', image: '/assets/icons/51.svg' },
-        night: { description: 'Heavy Drizzle', image: '/assets/icons/51.svg' },
+];
+
+export const UV_INDEX_SCALE = [
+    {
+        range: [0, 2.99],
+        level: 'Low',
+        risk: 'Minimal risk. No protection needed.',
+        icon: '🟢',
+        color: 'green',
     },
-    56: {
-        day: {
-            description: 'Light Freezing Drizzle',
-            image: '/assets/icons/51.svg',
-        },
-        night: {
-            description: 'Light Freezing Drizzle',
-            image: '/assets/icons/51.svg',
-        },
+    {
+        range: [3, 5.99],
+        level: 'Moderate',
+        risk: 'Moderate risk. Stay in shade during midday hours.',
+        icon: '🟡',
+        color: 'yellow',
     },
-    57: {
-        day: { description: 'Freezing Drizzle', image: '/assets/icons/51.svg' },
-        night: {
-            description: 'Freezing Drizzle',
-            image: '/assets/icons/51.svg',
-        },
+    {
+        range: [6, 7.99],
+        level: 'High',
+        risk: 'High risk. Protection needed — SPF 30+, hat, sunglasses, and seek shade.',
+        icon: '🟠',
+        color: 'orange',
     },
-    61: {
-        day: { description: 'Light Rain', image: '/assets/icons/61.svg' },
-        night: { description: 'Light Rain', image: '/assets/icons/61.svg' },
+    {
+        range: [8, 10.99],
+        level: 'Very High',
+        risk: 'Very high risk. Extra protection required.',
+        icon: '🔴',
+        color: 'red',
     },
-    63: {
-        day: { description: 'Rain', image: '/assets/icons/61.svg' },
-        night: { description: 'Rain', image: '/assets/icons/61.svg' },
+    {
+        range: [11, Infinity],
+        level: 'Extreme',
+        risk: 'Extreme risk. Take all precautions — unprotected skin and eyes can burn in minutes.',
+        icon: '🟣',
+        color: 'purple',
     },
-    65: {
-        day: { description: 'Heavy Rain', image: '/assets/icons/65.svg' },
-        night: { description: 'Heavy Rain', image: '/assets/icons/65.svg' },
+];
+
+export const WIND_SPEED_SCALE = [
+    {
+        range: [0, 1],
+        label: 'Calm',
+        description: 'Smoke rises vertically. Leaves unmoving.',
+        beaufort: 0,
+        icon: '🌫️',
+        color: '#d4f1f9',
     },
-    66: {
-        day: {
-            description: 'Light Freezing Rain',
-            image: '/assets/icons/65.svg',
-        },
-        night: {
-            description: 'Light Freezing Rain',
-            image: '/assets/icons/65.svg',
-        },
+    {
+        range: [1, 5],
+        label: 'Light Air',
+        description: 'Leaves rustle slightly. Wind vanes barely move.',
+        beaufort: 1,
+        icon: '🍃',
+        color: '#c1e6f7',
     },
-    67: {
-        day: { description: 'Freezing Rain', image: '/assets/icons/65.svg' },
-        night: { description: 'Freezing Rain', image: '/assets/icons/65.svg' },
+    {
+        range: [6, 11],
+        label: 'Light Breeze',
+        description: 'Leaves in motion. Wind felt on face.',
+        beaufort: 2,
+        icon: '🌿',
+        color: '#a8ddf2',
     },
-    71: {
-        day: { description: 'Light Snow', image: '/assets/icons/71.svg' },
-        night: { description: 'Light Snow', image: '/assets/icons/71.svg' },
+    {
+        range: [12, 19],
+        label: 'Gentle Breeze',
+        description: 'Leaves and small twigs in constant motion.',
+        beaufort: 3,
+        icon: '🍂',
+        color: '#90d2ed',
     },
-    73: {
-        day: { description: 'Snow', image: '/assets/icons/71.svg' },
-        night: { description: 'Snow', image: '/assets/icons/71.svg' },
+    {
+        range: [20, 28],
+        label: 'Moderate Breeze',
+        description: 'Loose paper and small branches move.',
+        beaufort: 4,
+        icon: '🍃',
+        color: '#76c5e8',
     },
-    75: {
-        day: { description: 'Heavy Snow', image: '/assets/icons/71.svg' },
-        night: { description: 'Heavy Snow', image: '/assets/icons/71.svg' },
+    {
+        range: [29, 38],
+        label: 'Fresh Breeze',
+        description: 'Small trees sway. Umbrellas hard to use.',
+        beaufort: 5,
+        icon: '🌬️',
+        color: '#59b9e3',
     },
-    77: {
-        day: { description: 'Snow Grains', image: '/assets/icons/77.svg' },
-        night: { description: 'Snow Grains', image: '/assets/icons/77.svg' },
+    {
+        range: [39, 49],
+        label: 'Strong Breeze',
+        description: 'Large branches move. Whistling in wires.',
+        beaufort: 6,
+        icon: '🌬️',
+        color: '#3aaddd',
     },
-    80: {
-        day: { description: 'Light Showers', image: '/assets/icons/65.svg' },
-        night: { description: 'Light Showers', image: '/assets/icons/65.svg' },
+    {
+        range: [50, 61],
+        label: 'Near Gale',
+        description: 'Whole trees sway. Walking becomes difficult.',
+        beaufort: 7,
+        icon: '💨',
+        color: '#189fd6',
     },
-    81: {
-        day: { description: 'Showers', image: '/assets/icons/65.svg' },
-        night: { description: 'Showers', image: '/assets/icons/65.svg' },
+    {
+        range: [62, 74],
+        label: 'Gale',
+        description: 'Twigs break off trees. Slight structural damage.',
+        beaufort: 8,
+        icon: '💨',
+        color: '#008ed0',
     },
-    82: {
-        day: { description: 'Heavy Showers', image: '/assets/icons/65.svg' },
-        night: { description: 'Heavy Showers', image: '/assets/icons/65.svg' },
+    {
+        range: [75, 88],
+        label: 'Severe Gale',
+        description: 'Shingles blown off roofs. Trees may uproot.',
+        beaufort: 9,
+        icon: '🌪️',
+        color: '#007bbd',
     },
-    85: {
-        day: {
-            description: 'Light Snow Showers',
-            image: '/assets/icons/85.svg',
-        },
-        night: {
-            description: 'Light Snow Showers',
-            image: '/assets/icons/85.svg',
-        },
+    {
+        range: [89, 102],
+        label: 'Storm',
+        description: 'Widespread damage possible. Trees break.',
+        beaufort: 10,
+        icon: '🌪️',
+        color: '#0069aa',
     },
-    86: {
-        day: { description: 'Snow Showers', image: '/assets/icons/86.svg' },
-        night: { description: 'Snow Showers', image: '/assets/icons/86.svg' },
+    {
+        range: [103, 117],
+        label: 'Violent Storm',
+        description: 'Extensive damage. Very dangerous.',
+        beaufort: 11,
+        icon: '🌪️',
+        color: '#005797',
     },
-    95: {
-        day: { description: 'Thunderstorm', image: '/assets/icons/95.svg' },
-        night: { description: 'Thunderstorm', image: '/assets/icons/95.svg' },
+    {
+        range: [118, Infinity],
+        label: 'Hurricane Force',
+        description: 'Catastrophic damage. Avoid all outdoor activity.',
+        beaufort: 12,
+        icon: '🌀',
+        color: '#004484',
     },
-    96: {
-        day: {
-            description: 'Light Thunderstorms With Hail',
-            image: '/assets/icons/97.svg',
-        },
-        night: {
-            description: 'Light Thunderstorms With Hail',
-            image: '/assets/icons/97.svg',
-        },
+];
+
+export const VISIBILITY_SCALE = [
+    {
+        range: [0, 100],
+        label: 'Dense Fog',
+        description: 'Very dangerous visibility. Travel is not advised.',
+        icon: '🌫️',
+        color: '#a8a8a8',
+        visibilityLevel: 'Very Poor',
     },
-    97: {
-        day: {
-            description: 'Thunderstorm With Rain',
-            image: '/assets/icons/97.svg',
-        },
-        night: {
-            description: 'Thunderstorm With Rain',
-            image: '/assets/icons/97.svg',
-        },
+    {
+        range: [101, 500],
+        label: 'Thick Fog',
+        description: 'Limited visibility. Drive with extreme caution.',
+        icon: '🌁',
+        color: '#bcbcbc',
+        visibilityLevel: 'Very Poor',
     },
-    99: {
-        day: {
-            description: 'Thunderstorm With Hail',
-            image: '/assets/icons/97.svg',
-        },
-        night: {
-            description: 'Thunderstorm With Hail',
-            image: '/assets/icons/97.svg',
-        },
+    {
+        range: [501, 1000],
+        label: 'Moderate Fog',
+        description: 'Visibility is poor. Use low-beam lights if driving.',
+        icon: '🌫️',
+        color: '#cfcfcf',
+        visibilityLevel: 'Poor',
     },
+    {
+        range: [1001, 2000],
+        label: 'Light Fog / Mist',
+        description: 'Noticeable haze, but some visibility remains.',
+        icon: '🌫️',
+        color: '#e0e0e0',
+        visibilityLevel: 'Fair',
+    },
+    {
+        range: [2001, 4000],
+        label: 'Haze',
+        description:
+            'Visibility is slightly reduced. Common in polluted or humid areas.',
+        icon: '🌫️',
+        color: '#e8e8e8',
+        visibilityLevel: 'Moderate',
+    },
+    {
+        range: [4001, 10000],
+        label: 'Clear',
+        description: 'Normal visibility for outdoor activities and driving.',
+        icon: '🌤️',
+        color: '#f2f2f2',
+        visibilityLevel: 'Good',
+    },
+    {
+        range: [10001, Infinity],
+        label: 'Very Clear',
+        description: 'Excellent visibility. Great for long-distance views.',
+        icon: '☀️',
+        color: '#ffffff',
+        visibilityLevel: 'Excellent',
+    },
+];
+
+export const AIR_QUALITY_SCALE = [
+    {
+        range: [0, 50],
+        label: 'Good',
+        description: 'Air quality is considered satisfactory.',
+        color: 'green',
+        icon: '🟢',
+        level: 'Low',
+    },
+    {
+        range: [51, 100],
+        label: 'Moderate',
+        description: 'Air quality is acceptable.',
+        color: 'yellow',
+        icon: '🟡',
+        level: 'Moderate',
+    },
+    {
+        range: [101, 150],
+        label: 'Unhealthy for Sensitive Groups',
+        description:
+            'Members of sensitive groups may experience health effects.',
+        color: 'orange',
+        icon: '🟠',
+        level: 'Elevated',
+    },
+    {
+        range: [151, 200],
+        label: 'Unhealthy',
+        description: 'Everyone may begin to experience health effects.',
+        color: 'red',
+        icon: '🔴',
+        level: 'High',
+    },
+    {
+        range: [201, 300],
+        label: 'Very Unhealthy',
+        description:
+            'Health alert: The risk of health effects is increased for everyone.',
+        color: 'purple',
+        icon: '🟣',
+        level: 'Very High',
+    },
+    {
+        range: [301, 500],
+        label: 'Hazardous',
+        description:
+            'Health warnings of emergency conditions. Everyone is more likely to be affected.',
+        color: '#7e0023',
+        icon: '🟤',
+        level: 'Severe',
+    },
+];
+
+export const PRESSURE_SCALE = [
+    {
+        range: [870, 979],
+        label: 'Extremely Low Pressure',
+        description:
+            'Typically associated with severe tropical cyclones, hurricanes, or typhoons. Extreme storm risk.',
+        icon: '🌀',
+        level: 'Extreme',
+        color: 'red-700',
+    },
+    {
+        range: [980, 999],
+        label: 'Very Low Pressure',
+        description:
+            'Indicates strong low-pressure systems. Often brings storms, heavy rain, or wind.',
+        icon: '🌧️',
+        level: 'Very Low',
+        color: 'orange-500',
+    },
+    {
+        range: [1000, 1012],
+        label: 'Low Pressure',
+        description:
+            'May indicate unsettled weather, including cloudiness or light precipitation.',
+        icon: '🌥️',
+        level: 'Low',
+        color: 'yellow-400',
+    },
+    {
+        range: [1013, 1016],
+        label: 'Normal Pressure',
+        description:
+            'Average sea-level pressure. Generally stable weather conditions.',
+        icon: '⛅',
+        level: 'Normal',
+        color: 'yellow-500',
+    },
+    {
+        range: [1017, 1030],
+        label: 'High Pressure',
+        description:
+            'Associated with fair weather, clear skies, and calmer conditions.',
+        icon: '☀️',
+        level: 'High',
+        color: 'green-400',
+    },
+    {
+        range: [1031, 1060],
+        label: 'Very High Pressure',
+        description:
+            'Stable air mass. May cause dry, cold, or hot spells depending on the season.',
+        icon: '🌞',
+        level: 'Very High',
+        color: 'blue-500',
+    },
+    {
+        range: [1061, 1085],
+        label: 'Extremely High Pressure',
+        description:
+            'Rare. Strong anticyclone or cold-air dome. May lead to temperature inversions or stagnant air.',
+        icon: '❄️',
+        level: 'Extreme',
+        color: 'purple-600',
+    },
+];
+
+export const TEMPERATURE_SCALE = [
+    {
+        rangeC: [-50, -1],
+        rangeF: [-58, 31],
+        label: 'Freezing Cold',
+        description: 'Extreme cold. Risk of frostbite or hypothermia.',
+        icon: '❄️',
+        comfort: 'Severe Cold',
+        tailwindColor: 'text-blue-800',
+    },
+    {
+        rangeC: [0, 5],
+        rangeF: [32, 42],
+        label: 'Very Cold',
+        description: 'Heavy layers required. Uncomfortable for most.',
+        icon: '🥶',
+        comfort: 'Very Cold',
+        tailwindColor: 'text-blue-600',
+    },
+    {
+        rangeC: [6, 12],
+        rangeF: [43, 54],
+        label: 'Chilly',
+        description: 'Cool and crisp. Jacket weather.',
+        icon: '🧥',
+        comfort: 'Cool',
+        tailwindColor: 'text-cyan-500',
+    },
+    {
+        rangeC: [13, 18],
+        rangeF: [55, 65],
+        label: 'Mild',
+        description: 'Comfortable for most. Ideal for outdoor activities.',
+        icon: '😊',
+        comfort: 'Mild',
+        tailwindColor: 'text-green-500',
+    },
+    {
+        rangeC: [19, 24],
+        rangeF: [66, 76],
+        label: 'Warm',
+        description: 'Pleasant warmth. No layers needed.',
+        icon: '🌤️',
+        comfort: 'Warm',
+        tailwindColor: 'text-yellow-500',
+    },
+    {
+        rangeC: [25, 29],
+        rangeF: [77, 85],
+        label: 'Hot',
+        description: 'Hot but tolerable. Hydration recommended.',
+        icon: '😅',
+        comfort: 'Hot',
+        tailwindColor: 'text-orange-500',
+    },
+    {
+        rangeC: [30, 35],
+        rangeF: [86, 96],
+        label: 'Very Hot',
+        description: 'Uncomfortable. Risk of heat exhaustion.',
+        icon: '🥵',
+        comfort: 'Very Hot',
+        tailwindColor: 'text-orange-600',
+    },
+    {
+        rangeC: [36, 50],
+        rangeF: [97, 122],
+        label: 'Extreme Heat',
+        description: 'Dangerous. Stay indoors or in shade.',
+        icon: '🔥',
+        comfort: 'Extreme',
+        tailwindColor: 'text-red-600',
+    },
+];
+
+export const WEATHER_CODES: Record<WeatherCode, string> = {
+    0: 'Clear sky',
+    1: 'Mainly clear',
+    2: 'Partly cloudy',
+    3: 'Overcast',
+    45: 'Fog',
+    48: 'Depositing rime fog',
+    51: 'Drizzle: Light intensity',
+    53: 'Drizzle: Moderate intensity',
+    55: 'Drizzle: Dense intensity',
+    56: 'Freezing Drizzle: Light intensity',
+    57: 'Freezing Drizzle: Dense intensity',
+    61: 'Rain: Slight intensity',
+    63: 'Rain: Moderate intensity',
+    65: 'Rain: Heavy intensity',
+    66: 'Freezing Rain: Light intensity',
+    67: 'Freezing Rain: Heavy intensity',
+    71: 'Snowfall: Slight intensity',
+    73: 'Snowfall: Moderate intensity',
+    75: 'Snowfall: Heavy intensity',
+    77: 'Snow grains',
+    80: 'Rain showers: Slight',
+    81: 'Rain showers: Moderate',
+    82: 'Rain showers: Violent',
+    85: 'Snow showers: Slight',
+    86: 'Snow showers: Heavy',
+    95: 'Thunderstorm: Slight or moderate',
+    96: 'Thunderstorm with slight hail',
+    99: 'Thunderstorm with heavy hail',
 };

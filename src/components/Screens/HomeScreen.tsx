@@ -1,70 +1,104 @@
 'use client';
+import { fetchWeatherData } from '@atombrenner/openmeteo';
+import WeatherInfo from '../WeatherInfo/WeatherInfo';
+import LocationSearch from '../LocationSearch';
+import { useAtomValue, useSetAtom } from 'jotai';
+import {
+    loadingAtom,
+    locationAtom,
+    temperatureUnitAtom,
+    weatherDataAtom,
+} from '@/atoms';
+import { useQuery } from '@tanstack/react-query';
+import CurrentWeather from '../CurrentWeather';
+import { useEffect } from 'react';
+import Background from '../Background/Background';
+import Forecast from '../ForecastSummary/ForecastSummary';
+import TemperatureUnitSelect from '../TemperatureUnitSelect';
+import { getAirQuality } from '@/lib/api';
+import { AirQualityData, IWeatherData } from '@/types';
+import TemperatureChart from '../WeatherChart/TemperatureChart';
 
-import NiceModal from '@ebay/nice-modal-react';
-import WeatherCard from '../WeatherCard/WeatherCard';
-import { fetchWeatherData, WeatherData } from '@atombrenner/openmeteo';
-import GeolocationModal from '../GeolocationModal';
-import { useState } from 'react';
+function HomeScreen() {
+    const location = useAtomValue(locationAtom);
+    const temperatureUnit = useAtomValue(temperatureUnitAtom);
+    const setWeatherData = useSetAtom(weatherDataAtom);
+    const setLoading = useSetAtom(loadingAtom);
 
-NiceModal.register('geolocation-modal', GeolocationModal);
-
-function HomeScreen({
-    data,
-}: {
-    data: WeatherData<
-        'precipitation' | 'temperature_2m',
-        'weather_code' | 'temperature_2m_max' | 'temperature_2m_min',
-        'temperature_2m' | 'weather_code'
-    > & {
-        location: string; // or a more specific type if needed
-    };
-}) {
-    const [weather, setWeather] = useState([data]);
-
-    const createWeatherCard = async () => {
-        const [lat, lon, location, timezone] = await NiceModal.show<
-            [number, number, string, string]
-        >('geolocation-modal');
-
-        if (lat && lon) {
-            const newData = await fetchWeatherData({
-                latitude: lat,
-                longitude: lon,
-                current: ['weather_code', 'temperature_2m'],
+    const { data: weatherData, isLoading } = useQuery({
+        queryKey: ['weatherData', location.lat, location.lng, temperatureUnit],
+        queryFn: async (): Promise<IWeatherData> => {
+            const weather = fetchWeatherData({
+                latitude: location.lat,
+                longitude: location.lng,
+                current: [
+                    'weather_code',
+                    'temperature_2m',
+                    'relative_humidity_2m',
+                    'apparent_temperature',
+                    'wind_speed_10m',
+                    'wind_direction_10m',
+                    'surface_pressure',
+                    'precipitation',
+                    // @ts-expect-error precipitation_probability not in type but required by API
+                    'precipitation_probability',
+                    // @ts-expect-error visibility not in type but required by API
+                    'visibility',
+                ],
                 daily: [
                     'weather_code',
                     'temperature_2m_max',
                     'temperature_2m_min',
+                    // @ts-expect-error apparent_temperature_max not in type but required by API
+                    'temperature_2m_mean',
+                    // @ts-expect-error apparent_temperature_max not in type but required by API
+                    'uv_index_max',
                 ],
-                hourly: ['temperature_2m', 'precipitation'],
-                temperature_unit: 'fahrenheit',
-                timezone,
+                hourly: ['temperature_2m'],
+                minutely: ['temperature_2m'],
+                forecast_days: 7,
+                temperature_unit: temperatureUnit,
+                timezone: 'auto',
             });
-            setWeather((prev) => [...prev, { ...newData, location }]);
-        }
-    };
+
+            const aq = getAirQuality(location.lat, location.lng);
+
+            const [weatherData, airQualityData] = await Promise.all([
+                weather,
+                aq,
+            ]);
+
+            return {
+                ...weatherData,
+                aq: airQualityData as AirQualityData,
+            };
+        },
+    });
+
+    console.log('Weather Data:', weatherData);
+
+    useEffect(() => {
+        setWeatherData(weatherData);
+    }, [weatherData, setWeatherData]);
+
+    useEffect(() => {
+        setLoading(isLoading);
+    }, [setLoading, isLoading]);
 
     return (
-        <NiceModal.Provider>
-            <div className="grid grid-cols-2 items-center gap-4">
-                {weather.map((item, index) => (
-                    <WeatherCard
-                        key={index}
-                        data={item}
-                        location={item.location}
-                    />
-                ))}
+        <div className="grid grid-cols-[350px_800px] grid-rows-[min-content_450px_500px] items-start bg-black h-full p-6 gap-4">
+            <div className="col-span-2 px-4 py-2 rounded-2xl relative overflow-hidden h-auto">
+                <div className="z-10 relative flex items-center justify-between gap-2">
+                    <LocationSearch />
+                    <TemperatureUnitSelect />
+                </div>
+                <Background />
             </div>
-
-            <div className="flex flex-col items-center justify-center mt-4">
-                <button
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    onClick={createWeatherCard}
-                >
-                    Open Geolocation Modal
-                </button>
-            </div>
-        </NiceModal.Provider>
+            <CurrentWeather />
+            <WeatherInfo />
+            <Forecast />
+            <TemperatureChart />
+        </div>
     );
 }
 

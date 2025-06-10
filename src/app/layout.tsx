@@ -1,9 +1,15 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Outfit } from 'next/font/google';
 import './globals.css';
+import QueryProvider from '@/lib/QueryProvider';
 
 const inter = Inter({
     variable: '--font-inter',
+    subsets: ['latin'],
+});
+
+const outfit = Outfit({
+    variable: '--font-outfit',
     subsets: ['latin'],
 });
 
@@ -18,10 +24,12 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
-            <body className={`${inter.variable} antialiased`}>
-                <main className="mx-auto my-16 max-w-[1080px] relative p-4">
-                    {children}
+        <html lang="en" className="dark">
+            <body
+                className={`${inter.variable} ${outfit.variable} antialiased`}
+            >
+                <main className="max-w-[1250px] mx-auto relative h-full">
+                    <QueryProvider>{children}</QueryProvider>
                 </main>
             </body>
         </html>
