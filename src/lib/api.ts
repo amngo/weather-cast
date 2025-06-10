@@ -4,9 +4,7 @@ export async function getPlaces(input: string) {
     });
 
     try {
-        const response = await fetch(
-            `http://localhost:3000/api/places?${params.toString()}`
-        );
+        const response = await fetch(`/api/places?${params.toString()}`);
         return await response.json();
     } catch (error) {
         console.error('Error fetching geolocation data:', error);
@@ -20,9 +18,7 @@ export async function getGeocoding(placeId: string) {
     });
 
     try {
-        const response = await fetch(
-            `http://localhost:3000/api/geocoding?${params.toString()}`
-        );
+        const response = await fetch(`/api/geocoding?${params.toString()}`);
         return await response.json();
     } catch (error) {
         console.error('Error fetching geolocation data:', error);
@@ -36,9 +32,7 @@ export async function getReverseGeocoding(lat: number, lng: number) {
     });
 
     try {
-        const response = await fetch(
-            `http://localhost:3000/api/geocoding?${params.toString()}`
-        );
+        const response = await fetch(`/api/geocoding?${params.toString()}`);
         return await response.json();
     } catch (error) {
         console.error('Error fetching reverse geolocation data:', error);
@@ -52,9 +46,7 @@ export async function getLocationImage(placeId: string) {
     });
 
     try {
-        const response = await fetch(
-            `http://localhost:3000/api/photos?${params.toString()}`
-        );
+        const response = await fetch(`/api/photos?${params.toString()}`);
         return await response.json();
     } catch (error) {
         console.error('Error fetching location image:', error);

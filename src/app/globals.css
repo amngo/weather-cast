@@ -11,7 +11,7 @@ body {
 
 body {
     position: relative;
-    font-family: Inter, Arial, Helvetica, sans-serif;
+    font-family: Outfit, Arial, Helvetica, sans-serif;
     display: flex;
     flex-direction: column;
 }
@@ -130,34 +130,6 @@ body {
     body {
         @apply bg-background text-foreground;
     }
-}
-
-.day {
-    @apply from-sky-600 to-blue-800;
-}
-
-.night {
-    @apply from-blue-800 to-indigo-900;
-}
-
-.thunderstorm {
-    @apply from-sky-600 to-blue-950;
-}
-
-.raining {
-    @apply from-blue-300 to-blue-600;
-}
-
-.snowing {
-    @apply from-indigo-400 to-cyan-400;
-}
-
-.foggy {
-    @apply from-blue-300 to-cyan-300;
-}
-
-.cloudy {
-    @apply from-indigo-400 to-blue-600;
 }
 
 .glass {
